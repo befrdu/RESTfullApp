@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd     
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+        
+     <!-- Enable @Contrroller  -->   
+    <mvc:annotation-driven/> 
+    
+    <!-- Enable autowiring -->
+    <context:annotation-config />
+      
+    <context:component-scan base-package="com.contactRecord"/>
+    
+    
+	<mvc:annotation-driven validator="validator" />
+    
+    <mvc:resources mapping="/css/**" location="/css/"/>
+    <mvc:resources mapping="/resource/**" location="/resources/"/>
+     
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="${driverClassName}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="${username}" />
+		<property name="password" value="${password}" />
+	</bean>
+
+	<!-- Session Factory Declaration -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan" value="com.contactRecord" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+				<prop key="hibernate.default_schema">test</prop>
+				<prop key="format_sql">true</prop>
+				<prop key="use_sql_comments">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop> 
+			</props>
+		</property>
+	</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	
+	 <bean id="transactionManager"
+        class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+      
+    
+    	<bean id= "messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+   		<property name="basenames" value="errorMessages,messages"/> 
+	</bean>
+	
+	<!-- for searching property file -->
+	<bean
+	class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+
+	<property name="location">
+		<value>classpath:datasource.properties</value>
+	</property>
+    </bean>
+	
+	<bean id="messageAccessor" class="org.springframework.context.support.MessageSourceAccessor">
+    	<constructor-arg  ref="messageSource"/>
+	</bean> 
+
+	<bean id="validator"
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+		<property name="validationMessageSource" ref="messageSource" />
+	</bean>
+
+      
+</beans>
